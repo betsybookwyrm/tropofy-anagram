@@ -42,7 +42,11 @@ class DictionaryWord(DataSetMixin):
     word = Column(Text, nullable=False)
     sorted = Column(Text, nullable=False)
 
-    def __init__(self, word):
+    def __init__(self, word=None, sorted=None):
+        """
+        The sorted parameter is ignored - it's only here to make entering data through SimpleGrid work. The column
+        should always be hidden.
+        """
         self.word = word
         self.sorted = hash_word(word)
 
@@ -72,21 +76,26 @@ class AnagramApp(AppWithDataSets):
         return {"SOWPODS Scrabble dictionary": load_sowpods}
 
     def get_gui(self):
-        # Dictionaries are not generally editable, and you don't want to read the whole list, so not including showing
-        # the dictionary as a first step
-
-        step_group1 = StepGroup(name='Pick a word')
+        # Dictionaries are not generally editable, but here it is just in case
+        step_group1 = StepGroup(name='View your dictionary')
         step_group1.add_step(Step(
+            name='Dictionary of available words',
+            widgets=[SimpleGrid(DictionaryWord, hidden_column_names=['sorted'])],
+            help_text="View and edit all possible potential anagram words"
+        ))
+
+        step_group2 = StepGroup(name='Pick a word')
+        step_group2.add_step(Step(
             name='Word to rearrange',
             widgets=[{"widget": ParameterForm(), "cols": 6}],
         ))
 
-        step_group2 = StepGroup(name='Solve')
-        step_group2.add_step(
+        step_group3 = StepGroup(name='Solve')
+        step_group3.add_step(
             Step(name='Solve Anagrams', widgets=[ExecuteSolverFunction()]))
 
-        step_group3 = StepGroup(name='View the Solutions')
-        step_group3.add_step(Step(
+        step_group4 = StepGroup(name='View the Solutions')
+        step_group4.add_step(Step(
             name='View Anagrams',
             widgets=[
                 {"widget": SimpleGrid(SolutionWord), "cols": 6}
@@ -94,7 +103,7 @@ class AnagramApp(AppWithDataSets):
             help_text="These words are all anagrams of your original word (excluding your original word itself)."
         ))
 
-        return [step_group1, step_group2, step_group3]
+        return [step_group1, step_group2, step_group3, step_group4]
 
     def get_parameters(self):
         return [Parameter(name='original_word', label='Original word', default='live', allowed_type=str,
@@ -149,7 +158,7 @@ def load_dictionary(app_session, file_path):
         for word in dictionary.readlines():
             clean_word = word.strip()
             if validate_word(clean_word):
-                app_session.data_set.add(DictionaryWord(clean_word))
+                app_session.data_set.add(DictionaryWord(word=clean_word))
 
 
 def load_sowpods(app_session):

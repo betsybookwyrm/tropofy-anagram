@@ -18,9 +18,10 @@ other word-internal punctuation. Dictionary substitution currently requires code
 
 ### Improvement
 
-Make dictionary loading properly Tropofyable for ease of loading other dictionaries. The easiest solution is to 
-convert the dictionary itself to CSV, but that might require changing how the DictionaryWord object pre-processes each 
-word. It depends on exactly how the Tropofy CSV loading works.
+Make dictionary loading from file easier, so all text file dictionaries present are available as example data sets
+
+`DictionaryWord.__init__()`'s handling of ignoring any input for `sorted` isn't nice at all, need to work out how to not 
+have that as a parameter. 
 
 ### Expansion
 
